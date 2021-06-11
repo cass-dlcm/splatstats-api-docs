@@ -1,0 +1,1006 @@
+_id: spc_bc5ce30a870a4f1a98708120c5e16938
+type: ApiSpec
+parentId: wrk_0bd7ff9bb68143e5be5e79faeb123647
+modified: 1623422354634
+created: 1623360488304
+fileName: splatstats.yaml
+contents: |-
+  openapi: 3.0.0
+  info:
+    description: "This is the API documentation for SplatStats."
+    version: 1.0.0
+    title: SplatStats
+    contact:
+      email: splatstats@cass-dlcm.dev
+    license:
+      name: GNU General Public License 3
+      url: https://www.gnu.org/licenses/gpl-3.0.en.html
+  tags:
+    - name: two_battles
+      description: Splatoon 2 PvP
+    - name: two_salmon
+      description: Splatoon 2 PvE
+    - name: user
+      description: Operations about user
+  paths:
+    /two_battles/api/battles:
+      post:
+        tags:
+          - two_battles
+        summary: Upload a match result
+        description: ""
+        operationId: addBattle
+        requestBody:
+          $ref: "#/components/schemas/Battle"
+        responses:
+      get:
+        tags:
+          - two_battles
+        summary: Retrieve a list of battles.
+        description: ""
+        operationId: getBattles
+        responses:
+          "200":
+            description: successful operation
+            content:
+              application/json:
+                schema:
+                  type: array
+                  items:
+                    $ref: "#/components/schemas/Battle"
+          "400":
+            description: Invalid status value
+    "/two_battles/api/battles/{userId}/{splatnetNum}":
+      get:
+        tags:
+          - two_battles
+        summary: Find Battle by user and Splatnet battle number.
+        description: Returns a single battle
+        operationId: getBattleById
+        parameters:
+          - name: userId
+            in: path
+            description: ID of user
+            required: true
+            schema:
+              type: integer
+              format: int64
+          - name: splatnetNum
+            in: path
+            description: Splatnet battle number
+            required: true
+            schema:
+              type: integer
+              format: int64
+        responses:
+          "200":
+            description: successful operation
+            content:
+              application/xml:
+                schema:
+                  $ref: "#/components/schemas/Battle"
+              application/json:
+                schema:
+                  $ref: "#/components/schemas/Battle"
+          "400":
+            description: Invalid ID supplied
+          "404":
+            description: Battle not found
+      post:
+        tags:
+          - two_battles
+        summary: Updates a battle with form data
+        description: ""
+        operationId: updateBattleWithForm
+        parameters:
+          - name: userId
+            in: path
+            description: ID of user
+            required: true
+            schema:
+              type: integer
+              format: int64
+          - name: splatnetNum
+            in: path
+            description: Splatnet battle number
+            required: true
+            schema:
+              type: integer
+              format: int64
+        requestBody:
+          content:
+            application/x-www-form-urlencoded:
+              schema:
+                type: object
+                properties:
+                  name:
+                    description: Updated name of the pet
+                    type: string
+                  status:
+                    description: Updated status of the pet
+                    type: string
+        responses:
+          "405":
+            description: Invalid input
+    /user:
+      post:
+        tags:
+          - user
+        summary: Create user
+        description: This can only be done by the logged in user.
+        operationId: createUser
+        requestBody:
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+          description: Created user object
+          required: true
+        responses:
+          default:
+            description: successful operation
+    /user/createWithArray:
+      post:
+        tags:
+          - user
+        summary: Creates list of users with given input array
+        description: ""
+        operationId: createUsersWithArrayInput
+        requestBody:
+          $ref: "#/components/requestBodies/UserArray"
+        responses:
+          default:
+            description: successful operation
+    /user/createWithList:
+      post:
+        tags:
+          - user
+        summary: Creates list of users with given input array
+        description: ""
+        operationId: createUsersWithListInput
+        requestBody:
+          $ref: "#/components/requestBodies/UserArray"
+        responses:
+          default:
+            description: successful operation
+    /user/login:
+      get:
+        tags:
+          - user
+        summary: Logs user into the system
+        description: ""
+        operationId: loginUser
+        parameters:
+          - name: username
+            in: query
+            description: The user name for login
+            required: true
+            schema:
+              type: string
+          - name: password
+            in: query
+            description: The password for login in clear text
+            required: true
+            schema:
+              type: string
+        responses:
+          "200":
+            description: successful operation
+            headers:
+              X-Rate-Limit:
+                description: calls per hour allowed by the user
+                schema:
+                  type: integer
+                  format: int32
+              X-Expires-After:
+                description: date in UTC when token expires
+                schema:
+                  type: string
+                  format: date-time
+            content:
+              application/xml:
+                schema:
+                  type: string
+              application/json:
+                schema:
+                  type: string
+          "400":
+            description: Invalid username/password supplied
+    /user/logout:
+      get:
+        tags:
+          - user
+        summary: Logs out current logged in user session
+        description: ""
+        operationId: logoutUser
+        responses:
+          default:
+            description: successful operation
+    "/user/{userId}":
+      get:
+        tags:
+          - user
+        summary: Get user by user id
+        description: ""
+        operationId: getUserById
+        parameters:
+          - name: userId
+            in: path
+            description: "The Id that needs to be fetched. Use 0 for testing. "
+            required: true
+            schema:
+              type: string
+        responses:
+          "200":
+            description: successful operation
+            content:
+              application/xml:
+                schema:
+                  $ref: "#/components/schemas/User"
+              application/json:
+                schema:
+                  $ref: "#/components/schemas/User"
+          "400":
+            description: Invalid user ID supplied
+          "404":
+            description: User not found
+      put:
+        tags:
+          - user
+        summary: Updated user
+        description: This can only be done by the logged in user.
+        operationId: updateUser
+        parameters:
+          - name: username
+            in: path
+            description: name that need to be updated
+            required: true
+            schema:
+              type: string
+        requestBody:
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+          description: Updated user object
+          required: true
+        responses:
+          "400":
+            description: Invalid user supplied
+          "404":
+            description: User not found
+      delete:
+        tags:
+          - user
+        summary: Delete user
+        description: This can only be done by the logged in user.
+        operationId: deleteUser
+        parameters:
+          - name: username
+            in: path
+            description: The name that needs to be deleted
+            required: true
+            schema:
+              type: string
+        responses:
+          "400":
+            description: Invalid username supplied
+          "404":
+            description: User not found
+  servers:
+    - url: https://splatstats.cass-dlcm.dev
+  components:
+    schemas:
+      Battle:
+        type: object
+        required:
+        - splatnet_upload
+        properties:
+          id:
+            type: integer
+            readOnly: true
+          splatnet_json:
+            $ref: "#/components/schemas/battleSplatnet"
+            nullable: true
+          splatnet_upload:
+            type: boolean
+          stat_ink_json:
+            $ref: "#/components/schemas/battleStatInk"
+            nullable: true
+      battleSplatnet:
+        type: object
+        properties:
+          udemae:
+            $ref: "#/components/schemas/udemae"
+          stage:
+            $ref: "#/components/schemas/battleTriple"
+          other_team_count:
+            type: integer
+            minimum: 0
+            maximum: 100
+          my_team_count:
+            type: integer
+            maximum: 100
+            minimum: 0
+          star_rank:
+            type: integer
+            minimum: 0
+          rule:
+            $ref: "#/components/schemas/rule"
+          player_result:
+            $ref: "#/components/schemas/playerResult"
+          estimate_gachi_power:
+            type: integer
+            nullable: true
+            minimum: 0
+          elapsed_time:
+            type: integer
+            minimum: 0
+            maximum: 420
+          start_time:
+            type: integer
+          game_mode:
+            $ref: "#/components/schemas/battleDouble"
+          x_power:
+            type: object
+            nullable: true
+          battle_number:
+            type: string
+          type:
+            type: string
+          player_rank:
+            type: integer
+            mininum: 1
+            maximum: 99
+          crown_players:
+            type: object
+            nullable: true
+          my_team_members:
+            type: array
+            items:
+              $ref: "#/components/schemas/playerResult"
+            maxItems: 3
+          other_team_members:
+            type: array
+            items:
+              $ref: "#/components/schemas/playerResult"
+            maxItems: 4
+          weapon_paint_point:
+            type: integer
+            minimum: 0
+          rank:
+            type: object
+            nullable: true
+          my_team_result:
+            $ref: "#/components/schemas/battleDouble"
+          estimate_x_power:
+            type: object
+            nullable: true
+          other_team_result:
+            $ref: "#/components/schemas/battleDouble"
+          league_point:
+            type: number
+            nullable: true
+          win_meter:
+            type: number
+            minimum: 0
+            maximum: 99.5
+          my_team_percentage:
+            type: number
+            minimum: 0
+            maximum: 100
+          other_team_percentage:
+            type: number
+            minimum: 0
+            maximum: 100
+          tag_id:
+            type: string
+      udemae:
+        type: object
+        properties:
+          name:
+            type: string
+          is_x:
+            type: boolean
+          is_number_reached:
+            type: boolean
+          number:
+            type: integer
+            minimum: 0
+            maximum: 20
+          s_plus_number:
+            type: integer
+            minimum: 0
+            maximum: 9
+            nullable: true
+      skills:
+        type: object
+        properties:
+          main:
+            $ref: "#/components/schemas/battleTriple"
+          subs:
+            type: array
+            items:
+              $ref: "#/components/schemas/battleTriple"
+            maxItems: 3
+      battleTriple:
+        type: object
+        properties:
+          id:
+            type: string
+          image:
+            type: string
+          name:
+            type: string
+      rule:
+        allOf:
+        - $ref: "#/components/schemas/battleDouble"
+        - type: object
+          properties:
+            multiline_name:
+              type: string
+      playerResult:
+        type: object
+        properties:
+          death_count:
+            type: integer
+            minimum: 0
+          game_paint_point:
+            type: integer
+            minimum: 0
+          kill_count:
+            type: integer
+            minimum: 0
+          special_count:
+            type: integer
+            minimum: 0
+          assist_count:
+            type: integer
+            minimum: 0
+          sort_score:
+            type: integer
+            minimum: 0
+            maximum: 3
+          player:
+            $ref: "#/components/schemas/player"
+      player:
+        type: object
+        properties:
+          head_skills:
+            $ref: "#/components/schemas/skills"
+          shoes_skills:
+            $ref: "#/components/schemas/skills"
+          clothes_skills:
+            $ref: "#/components/schemas/skills"
+          player_rank:
+            type: integer
+            minimum: 1
+            maximum: 99
+          star_rank:
+            type: integer
+            minimum: 0
+          nickname:
+            type: string
+          player_type:
+            $ref: "#/components/schemas/playerType"
+          principal_id:
+            type: string
+          head:
+            $ref: "#/components/schemas/clothing"
+          clothes:
+            $ref: "#/components/schemas/clothing"
+          shoes:
+            $ref: "#/components/schemas/clothing"
+          udemae:
+            $ref: "#/components/schemas/udemae"
+          weapon:
+            $ref: "#/components/schemas/weapon"
+      playerType:
+        type: object
+        properties:
+          gender:
+            type: string
+          species:
+            type: string
+      clothing:
+        allOf:
+        - $ref: "#/components/schemas/battleTriple"
+        - type: object
+          properties:
+            thumbnail:
+              type: string
+            kind:
+              type: string
+            rarity:
+              type: integer
+            brand:
+              $ref: "#/components/schemas/brand"
+      brand:
+        allOf:
+        - $ref: "#/components/schemas/battleTriple"
+        - type: object
+          properties:
+            frequent_skill:
+              $ref: "#/components/schemas/battleTriple"
+      weapon:
+        allOf:
+        - $ref: "#/components/schemas/battleTriple"
+        - type: object
+          properties:
+            thumbnail:
+              type: string
+            sub:
+              $ref: "#/components/schemas/battleQuad"
+            special:
+              $ref: "#/components/schemas/battleQuad"
+      battleQuad:
+        type: object
+        properties:
+          id:
+            type: string
+          image_a:
+            type: string
+          image_b:
+            type: string
+          name:
+            type: string
+      battleDouble:
+        type: object
+        properties:
+          key:
+            type: string
+          name:
+            type: string
+      battleStatInk:
+        type: object
+        properties:
+          id:
+            type: integer
+            mininum: 0
+          splatnet_number:
+            type: integer
+            mininum: 0
+          url:
+            type: string
+          user:
+            $ref: "#/components/schemas/statInkUser"
+          lobby:
+            $ref: "#/components/schemas/statInkKeyName"
+          mode:
+            $ref: "#/components/schemas/statInkKeyName"
+          rule:
+            $ref: "#/components/schemas/statInkKeyName"
+          map:
+            $ref: "#/components/schemas/statInkMap"
+          weapon:
+            $ref: "#/components/schemas/statInkWeapon"
+          freshness:
+            $ref: "#/components/schemas/statInkFreshness"
+          rank:
+            $ref: "#/components/schemas/statInkRank"
+          rank_exp:
+            type: integer
+            nullable: true
+          rank_after:
+            $ref: "#/components/schemas/statInkRank"
+          x_power:
+            type: object
+            nullable: true
+          x_power_after:
+            type: object
+            nullable: true
+          estimate_x_power:
+            type: object
+            nullable: true
+          level:
+            type: integer
+          level_after:
+            type: integer
+          star_rank:
+            type: integer
+          result:
+            type: string
+          knock_out:
+            type: boolean
+            nullable: true
+          rank_in_team:
+            type: integer
+            minimum: 1
+            maximum: 4
+            nullable: true
+          kill:
+            type: integer
+            minimum: 0
+          death:
+            type: integer
+            minimum: 0
+          kill_or_assist:
+            type: integer
+            minimum: 0
+          special:
+            type: integer
+            minimum: 0
+        example:
+          id: 790664
+          splatnet_number: 657
+          url: "https://stat.ink/@MunchingCass/spl2/790664"
+          user:
+            $ref: "#/components/schemas/statInkUser/example"
+          lobby:
+            $ref: "#/components/schemas/statInkKeyName/example"
+          mode:
+            $ref: "#/components/schemas/statInkKeyName/example"
+          rule:
+            $ref: "#/components/schemas/statInkKeyName/example"
+          map:
+            $ref: "#/components/schemas/statInkMap/example"
+          weapon:
+            $ref: "#/components/schemas/statInkWeapon/example"
+          freshness:
+            $ref: "#/components/schemas/statInkFreshness/example"
+          rank:
+            $ref: "#/components/schemas/statInkRank/example"
+          rank_exp: 1
+          rank_after:
+            $ref: "#/components/schemas/statInkRank/example"
+          rank_exp_after: 2
+          x_power: null
+          x_power_after: null
+          estimate_x_power: null
+          level: 31
+          level_after: 31
+          star_rank: 0
+          result: lose
+          knock_out: true
+          rank_in_team: null
+          kill: 5
+          death: 5
+          kill_or_assist: 5
+          special: 0
+      statInkUser:
+        type: object
+        properties:
+          id:
+            type: integer
+          name:
+            type: string
+          screen_name:
+            type: string
+          url:
+            type: string
+          join_at:
+            $ref: "#/components/schemas/statInkTime"
+          profile:
+            $ref: "#/components/schemas/statInkProfile"
+          stat:
+            type: object
+            nullable: true
+          stats:
+            $ref: "#/components/schemas/statInkStats"
+        example:
+          id: 9568
+          name: "Cass, the Fae"
+          screen_name: "MunchingCass"
+          url: "https://stat.ink/@MunchingCass"
+          join_at:
+            $ref: "#/components/schemas/statInkTime/example"
+          profile:
+            $ref: "#/components/schemas/statInkProfile/example"
+          stat: null
+          stats:
+            $ref: "#/components/schemas/statInkStats/example"
+      statInkTime:
+        type: object
+        properties:
+          time:
+            type: int
+          iso8601:
+            type: string
+        example:
+          time: 1527811200
+          iso8601: "2018-06-01T00:00:00Z"
+      statInkProfile:
+        type: object
+        properties:
+          nnid:
+            type: object
+            nullable: true
+          friend_code:
+            type: string
+            nullable: true
+          twitter:
+            type: object
+            nullable: true
+          ikanakama:
+            type: object
+            nullable: true
+          ikanakama2:
+            type: object
+            nullable: true
+          environment:
+            type: object
+            nullable: true
+        example:
+          nnid: null
+          friend_code: SW-3454-6911-0516
+          twitter: null
+          ikanakama: null
+          ikanakama2: null
+          environment: null
+      statInkStats:
+        type: object
+        properties:
+          v1:
+            type: object
+            nullable: true
+          v2:
+            $ref: "#/components/schemas/statInkV2"
+        example:
+          v1: null
+          v2:
+            $ref: "#/components/schemas/statInkV2/example"
+      statInkV2:
+        type: object
+        properties:
+          updated_at:
+            $ref: "#/components/schemas/statInkTime"
+          entire:
+            $ref: "#/components/schemas/statInkEntire"
+          nawabari:
+            $ref: "#/components/schemas/statInkNawabari"
+          gachi:
+            $ref: "#/components/schemas/statInkGachi"
+        example:
+          updated_at:
+            $ref: "#/components/schemas/statInkTime/example"
+          entire:
+            $ref: "#/components/schemas/statInkEntire/example"
+          nawabari:
+            $ref: "#/components/schemas/statInkNawabari/example"
+          gachi:
+            $ref: "#/components/schemas/statInkGachi/example"
+      statInkEntire:
+        type: object
+        properties:
+          battles:
+            type: int
+          win_pct:
+            type: number
+          kill_ratio:
+            type: number
+          kill_total:
+            type: int
+          kill_avg:
+            type: number
+          kill_per_min:
+            type: number
+          death_total:
+            type: integer
+          death_avg:
+            type: number
+          death_per_min:
+            type: number
+        example:
+          battles: 4448
+          win_pct: 48.78597122302158
+          kill_ratio: 0.69
+          kill_total: 25647
+          kill_avg: 5.773750562809545
+          kill_per_min: 1.5879364627286603
+          death_total: 36940
+          death_avg: 8.316073840612336
+          death_per_min: 2.2871436399265686
+      statInkNawabari:
+        allOf:
+        - $ref: "#/components/schemas/statInkEntire"
+        - type: object
+          properties:
+            total_inked:
+              type: integer
+            max_inked:
+              type: integer
+            avg_inked:
+              type: number
+        example:
+          $ref: "#/components/schemas/statInkEntire/example"
+          total_inked: 1096372
+          max_inked: 1414
+          avg_inked: 783.1228571428571
+      statInkGachi:
+        allOf:
+        - $ref: "#/components/schemas/statInkEntire"
+        - type: object
+          properties:
+            rules:
+              $ref: "#/components/schemas/statInkRules"
+        example:
+          $ref: "#/components/schemas/statInkEntire/example"
+          rules:
+            $ref: "#/components/schemas/statInkRules/example"
+      statInkRules:
+        type: object
+        properties:
+          area:
+            $ref: "#/components/schemas/statInkRulesSub"
+          yagura:
+            $ref: "#/components/schemas/statInkRulesSub"
+          hoko:
+            $ref: "#/components/schemas/statInkRulesSub"
+          asari:
+            $ref: "#/components/schemas/statInkRulesSub"
+        example:
+          area:
+            $ref: "#/components/schemas/statInkRulesSub/example"
+          yagura:
+            $ref: "#/components/schemas/statInkRulesSub/example"
+          hoko:
+            $ref: "#/components/schemas/statInkRulesSub/example"
+          asari:
+            $ref: "#/components/schemas/statInkRulesSub/example"
+      statInkRulesSub:
+        type: object
+        properties:
+          rank_peak:
+            type: string
+          rank_current:
+            type: string
+          x_power_peak:
+            type: object
+            nullable: true
+          x_power_current:
+            type: object
+            nullable: true
+        example:
+          rank_peak: S+ 3
+          rank_current: S+ 2
+          x_power_peak: null
+          x_power_current: null
+      statInkKeyName:
+        type: object
+        properties:
+          key:
+            type: string
+          name:
+            $ref: "#/components/schemas/statInkName"
+        example:
+          key: gachi
+          name:
+            $ref: "#/components/schemas/statInkName/example"
+      statInkName:
+        type: object
+        properties:
+          de_DE:
+            type: string
+          en_GB:
+            type: string
+          en_US:
+            type: string
+          es_ES:
+            type: string
+          es_MX:
+            type: string
+          fr_CA:
+            type: string
+          fr_FR:
+            type: string
+          it_IT:
+            type: string
+          ja_JP:
+            type: string
+          nl_NL:
+            type: string
+          ru_RU:
+            type: string
+          zh_CN:
+            type: string
+          zh_TW:
+            type: string
+        example:
+          de_DE: Rangkampf
+          en_GB: Ranked Battle
+          en_US: Ranked Battle
+          es_ES: Combate competitivo
+          es_MX: Combate competitivo
+          fr_CA: Match pro
+          fr_FR: Match pro
+          it_IT: Partita pro
+          ja_JP: ガチマッチ
+          nl_NL: Profgevecht
+          ru_RU: Бой элиты
+          zh_CN: 排名比赛
+          zh_TW: 排名比賽
+      statInkMap:
+        allOf:
+        - $ref: "#/components/schemas/statInkKeyName"
+        - type: object
+          properties:
+            splatnet:
+              type: integer
+            area:
+              type: integer
+            release_at:
+              $ref: "#/components/schemas/statInkTime"
+            short_name:
+              $ref: "#/components/schemas/statInkName"
+        example:
+          $ref: "#/components/schemas/statInkKeyName/example"
+          splatnet: 20
+          area: 2858
+          short_name:
+            $ref: "#/components/schemas/statInkName/example"
+          release_at:
+            $ref: "#/components/schemas/statInkTime/example"
+      statInkWeapon:
+        allOf:
+        - $ref: "#/components/schemas/statInkKeyName"
+        - type: object
+          properties:
+            splatnet:
+              type: integer
+            type:
+              $ref: "#/components/schemas/statInkWeaponType"
+            reskin_of:
+              type: string
+            main_ref:
+              type: string
+            sub:
+              $ref: "#/components/schemas/statInkKeyName"
+            special:
+              $ref: "#/components/schemas/statInkKeyName"
+            main_power_up:
+              $ref: "#/components/schemas/statInkKeyName"
+        example:
+          $ref: "#/components/schemas/statInkKeyName/example"
+          splatnet: 45
+          reskin_of: sshooter
+          main_ref: sshooter
+          type:
+            $ref: "#/components/schemas/statInkWeaponType/example"
+          sub:
+            $ref: "#/components/schemas/statInkKeyName/example"
+          special:
+            $ref: "#/components/schemas/statInkKeyName/example"
+          main_power_up:
+            $ref: "#/components/schemas/statInkKeyName/example"
+      statInkWeaponType:
+        allOf:
+        - $ref: "#/components/schemas/statInkKeyName"
+        - type: object
+          properties:
+            category:
+              $ref: "#/components/schemas/statInkKeyName"
+        example:
+          $ref: "#/components/schemas/statInkKeyName/example"
+          category:
+            $ref: "#/components/schemas/statInkKeyName/example"
+      statInkFreshness:
+        type: object
+        properties:
+          freshness:
+            type: number
+          title:
+            $ref: "#/components/schemas/statInkName"
+        example:
+          freshness: 99.5
+          title:
+            $ref: "#/components/schemas/statInkName/example"
+      statInkRank:
+        allOf:
+        - $ref: "#/components/schemas/statInkKeyName"
+        - type: object
+          properties:
+            zone:
+              $ref: "#/components/schemas/statInkKeyName"
+        example:
+          $ref: "#/components/schemas/statInkKeyName/example"
+          zone:
+            $ref: "#/components/schemas/statInkKeyName/example"
+    responses:
+    parameters:
+    examples:
+    requestBodies:
+    headers:
+    securitySchemes:
+    links:
+    callbacks:
+contentType: yaml

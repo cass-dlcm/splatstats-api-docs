@@ -1,11 +1,12 @@
 _id: spc_bc5ce30a870a4f1a98708120c5e16938
 type: ApiSpec
 parentId: wrk_0bd7ff9bb68143e5be5e79faeb123647
-modified: 1623422354634
+modified: 1623437299241
 created: 1623360488304
 fileName: splatstats.yaml
-contents: |-
+contents: >-
   openapi: 3.0.0
+
   info:
     description: "This is the API documentation for SplatStats."
     version: 1.0.0
@@ -620,13 +621,159 @@ contents: |-
           special:
             type: integer
             minimum: 0
+          kill_ratio:
+            type: number
+          kill_rate:
+            type: number
+          max_kill_combo:
+            type: object
+            nullable: true
+          max_kill_streak:
+            type: object
+            nullable: true
+          death_reasons:
+            type: object
+            nullable: true
+          my_point:
+            type: integer
+            minimum: 0
+          estimate_gachi_power:
+            type: integer
+            minimum: 0
+            nullable: true
+          league_point:
+            type: string
+            nullable: true
+          my_team_estimate_league_point:
+            type: integer
+            nullable: true
+          his_team_estimate_league_point:
+            type: integer
+            nullable: true
+          my_team_point:
+            type: object
+            nullable: true
+          his_team_point:
+            nullable: true
+          my_team_percent:
+            type: string
+            nullable: true
+          his_team_percent:
+            type: string
+            nullable: true
+          my_team_id:
+            type: string
+            nullable: true
+          his_team_id:
+            type: string
+            nullable: true
+          species:
+            $ref: "#/components/schemas/statInkKeyName"
+          gender:
+            $ref: "#/components/schemas/statInkGender"
+          fest_title:
+            $ref: "#/components/schemas/statInkKeyName"
+          fest_exp:
+            type: integer
+            nullable: true
+          fest_title_after:
+            $ref: "#/components/schemas/statInkKeyName"
+          fest_exp_after:
+            type: integer
+            nullable: true
+          fest_power:
+            type: string
+            nullable: true
+          my_team_estimate_fest_power:
+            type: integer
+            nullable: true
+          his_team_my_team_estimate_fest_power:
+            type: integer
+            nullable: true
+          my_team_fest_theme:
+            type: string
+            nullable: true
+          my_team_nickname:
+            type: string
+            nullable: true
+          his_team_nickname:
+            type: string
+            nullable: true
+          clout:
+            type: integer
+            nullable: true
+          total_clout:
+            type: integer
+            nullable: true
+          total_clout_after:
+            type: integer
+            nullable: true
+          my_team_win_streak:
+            type: integer
+            nullable: true
+          his_team_win_streak:
+            type: integer
+            nullable: true
+          synergy_bonus:
+            type: number
+            nullable: true
+          special_battle:
+            $ref: "#/components/schemas/statInkKeyName"
+            nullable: true
+          image_result:
+            type: string
+            nullable: true
+          image_gear:
+            type: string
+            nullable: true
+          gears:
+            $ref: "#/components/schemas/statInkGears"
+          period:
+            type: integer
+          period_range:
+            type: string
+          players:
+            type: array
+            items:
+              $ref: "#/components/schemas/statInkPlayer"
+            maxItems: 8
+          events:
+            type: object
+            nullable: true
+          splatnet_json:
+            type: object
+            nullable: true
+          agent:
+            $ref: "#/components/schemas/statInkAgent"
+          automated:
+            type: boolean
+          environment:
+            type: object
+            nullable: true
+          link_url:
+            type: string
+            nullable: true
+          note:
+            type: object
+            nullable: true
+          game_version:
+            type: string
+          nawabari_bonus:
+            type: integer
+            nullable: true
+          start_at:
+            $ref: "#/components/schemas/statInkTime"
+          end_at:
+            $ref: "#/components/schemas/statInkTime"
+          register_at:
+            $ref: "#/components/schemas/statInkTime"
         example:
           id: 790664
           splatnet_number: 657
           url: "https://stat.ink/@MunchingCass/spl2/790664"
           user:
             $ref: "#/components/schemas/statInkUser/example"
-          lobby:
+          lobby:  
             $ref: "#/components/schemas/statInkKeyName/example"
           mode:
             $ref: "#/components/schemas/statInkKeyName/example"
@@ -657,6 +804,53 @@ contents: |-
           death: 5
           kill_or_assist: 5
           special: 0
+          kill_ratio: 1
+          kill_rate: 0.5
+          max_kill_combo: null
+          max_kill_streak: null
+          death_reasons: null
+          my_point: 381
+          estiamte_gachi_power: 1570
+          league_point: "1872.5"
+          my_team_estimate_league_point: 2060
+          his_team_estimate_league_point: 2010
+          my_team_point: null
+          his_team_point: null
+          my_team_percent: "58.2"
+          his_team_percent: "29.9"
+          my_team_id: "3IgsPttLKlx"
+          his_team_id: null
+          species:
+            $ref: "#/components/schemas/statInkKeyName/example"
+          gender:
+            $ref: "#/components/schemas/statInkGender/example"
+          fest_title:
+            $ref: "#/components/schemas/statInkKeyName/example"
+          fest_exp: 0
+          fest_title_after:
+            $ref: "#/components/schemas/statInkKeyName/example"
+          fest_exp_after: 0
+          fest_power: "0.0"
+          my_team_estimate_fest_power: 1850
+          his_team_my_team_estimate_fest_power: 1900
+          my_team_fest_theme: Chaos
+          his_team_fest_theme: Order
+          my_team_nickname: "The\u00a0Jetflame Shadowpunk Custom-Dualie-Squelcher Lady\u00a0Squad"
+          his_team_nickname: "The\u00a0Squid\u00a0Squad"
+          clout: 2069
+          total_clout: 50485
+          total_clout_after: 52554
+          my_team_win_streak: 0
+          his_team_win_streak: 0
+          synergy_bonus: 1.2
+          special_battle:
+            $ref: "#/components/schemas/statInkKeyName/example"
+          image_result: "https:\/\/img.stat.ink\/p6\/p6yau4fayvcu7d4ickdkkjckxq.jpg"
+          image_gear: "https:\/\/img.stat.ink\/gi\/gi4cauq5z5dyzotlxqtxtn5b7e.jpg"
+          gears:
+            $ref: "#/components/schemas/statInkGears/example"
+          period: 212046
+          period_range: "2018-05-19T12:00:00+00:00\/2018-05-19T14:00:00+00:00"
       statInkUser:
         type: object
         properties:
@@ -923,7 +1117,9 @@ contents: |-
             short_name:
               $ref: "#/components/schemas/statInkName"
         example:
-          $ref: "#/components/schemas/statInkKeyName/example"
+          key: gachi
+          name:
+            $ref: "#/components/schemas/statInkName/example"
           splatnet: 20
           area: 2858
           short_name:
@@ -950,7 +1146,9 @@ contents: |-
             main_power_up:
               $ref: "#/components/schemas/statInkKeyName"
         example:
-          $ref: "#/components/schemas/statInkKeyName/example"
+          key: gachi
+          name:
+            $ref: "#/components/schemas/statInkName/example"
           splatnet: 45
           reskin_of: sshooter
           main_ref: sshooter
@@ -970,7 +1168,9 @@ contents: |-
             category:
               $ref: "#/components/schemas/statInkKeyName"
         example:
-          $ref: "#/components/schemas/statInkKeyName/example"
+          key: gachi
+          name:
+            $ref: "#/components/schemas/statInkName/example"
           category:
             $ref: "#/components/schemas/statInkKeyName/example"
       statInkFreshness:
@@ -992,9 +1192,164 @@ contents: |-
             zone:
               $ref: "#/components/schemas/statInkKeyName"
         example:
-          $ref: "#/components/schemas/statInkKeyName/example"
+          key: a-
+          name:
+            $ref: "#/components/schemas/statInkName/example"
           zone:
             $ref: "#/components/schemas/statInkKeyName/example"
+      statInkGender:
+        type: object
+        properties:
+          key:
+            type: string
+          name:
+            $ref: "#/components/schemas/statInkName"
+          iso5218:
+            type: int
+        example:
+          key: girl
+          name:
+            $ref: "#/components/schemas/statInkName/example"
+          iso5218: 2
+      statInkGears:
+        type: object
+        properties:
+          headgear:
+            $ref: "#/components/schemas/statInkClothes"
+          clothing:
+            $ref: "#/components/schemas/statInkClothes"
+          shoes:
+            $ref: "#/components/schemas/statInkClothes"
+        example:
+          headgear:
+            $ref: "#/components/schemas/statInkClothes/example"
+          clothing:
+            $ref: "#/components/schemas/statInkClothes/example"
+          shoes:
+            $ref: "#/components/schemas/statInkClothes/example"
+      statInkClothes:
+        type: object
+        properties:
+          gear:
+            $ref: "#/components/schemas/statInkGear"
+          primary_ability:
+            $ref: "#/components/schemas/statInkKeyName"
+          secondary_abilities:
+            type: array
+            items:
+              $ref: "#/components/schemas/statInkKeyName"
+            maxItems: 3
+        example:
+          gear:
+            $ref: "#/components/schemas/statInkGear/example"
+          primary_ability:
+            $ref: "#/components/schemas/statInkKeyName/example"
+          secondary_abilities:
+            - $ref: "#/components/schemas/statInkKeyName/example"
+      statInkGear:
+        allOf:
+        - $ref: "#/components/schemas/statInkKeyName"
+        - type: object
+          properties:
+            splatnet:
+              type: integer
+            type:
+              $ref: "#/components/schemas/statInkKeyName"
+            brand:
+              $ref: "#/components/schemas/statInkKeyName"
+            primary_ability:
+              $ref: "#/components/schemas/statInkKeyName"
+        example:
+          splatnet: 2002
+          key: striped_beanie
+          name:
+            $ref: "#/components/schemas/statInkName/example"
+          type:
+            $ref: "#/components/schemas/statInkName/example"
+          brand:
+            $ref: "#/components/schemas/statInkName/example"
+          primary_ability:
+            $ref: "#/components/schemas/statInkName/example"
+      statInkPlayer:
+        type: object
+        properties:
+          team:
+            type: string
+          is_me:
+            type: boolean
+          weapon:
+            $ref: "#/components/schemas/statInkWeapon"
+          level:
+            type: integer
+            minimum: 1
+            maximum: 99
+          rank:
+            $ref: "#/components/schemas/statInkRank"
+            nullable: true
+          star_rank:
+            type: integer
+            minimum: 0
+          rank_in_team:
+            type: integer
+            minimum: 1
+            maximum: 4
+            nullable: true
+          kill:
+            type: integer
+            minimum: 0
+          death:
+            type: integer
+            minimum: 0
+          kill_or_assist:
+            type: integer
+            minimum: 0
+          special:
+            type: integer
+            minimum: 0
+          my_kill:
+            type: object
+            nullable: true
+          point:
+            type: int
+            minimum: 0
+          name:
+            type: string
+          species:
+            $ref: "#/components/schemas/statInkKeyName"
+          gender:
+            $ref: "#/components/schemas/statInkGender"
+          fest_title:
+            $ref: "#/components/schemas/statInkKeyName"
+          splatnet_id:
+            type: string
+          top_500:
+            type: boolean
+          icon:
+            type: string
+      statInkAgent:
+        type: object
+        properties:
+          name:
+            type: string
+          version:
+            type: string
+          game_version:
+            type: object
+            nullable: true
+          game_version_date:
+            type: object
+            nullable: true
+          custom:
+            type: object
+            nullable: true
+          variables:
+            $ref: "#/components/schemas/statInkVariables"
+            nullable: true
+      statInkVariables:
+        type: object
+        properties:
+          upload_mode:
+            type: string
     responses:
     parameters:
     examples:

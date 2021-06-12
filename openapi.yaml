@@ -1,7 +1,7 @@
 openapi: 3.0.0
 info:
-  description: "This is the API documentation for SplatStats."
-  version: 0.2.0
+  description: "This is the API documentation for a future revision of SplatStats."
+  version: 0.3.0
   title: SplatStats
   contact:
     email: splatstats@cass-dlcm.dev
@@ -16,13 +16,20 @@ tags:
   - name: user
     description: Operations about user
 paths:
-  /two_battles/api/battles:
+  /api/v0-3-0/two_battles/:
     post:
       tags:
         - two_battles
       summary: Upload a match result
       description: ""
       operationId: addBattle
+      parameters:
+        - name: auth_token
+          in: header
+          description: token to be passed as a header
+          required: true
+          schema:
+            type: string
       requestBody:
         $ref: "#/components/requestBodies/Battle"
       responses:
@@ -45,7 +52,7 @@ paths:
                   $ref: "#/components/schemas/Battle"
         "400":
           description: Invalid status value
-  "/two_battles/api/battles/{userId}/{splatnetNum}":
+  /api/v0-3-0/two_battles/{userId}/{splatnetNum}:
     get:
       tags:
         - two_battles
@@ -59,7 +66,6 @@ paths:
           required: true
           schema:
             type: integer
-            format: int64
         - name: splatnetNum
           in: path
           description: Splatnet battle number
@@ -71,9 +77,6 @@ paths:
         "200":
           description: successful operation
           content:
-            application/xml:
-              schema:
-                $ref: "#/components/schemas/Battle"
             application/json:
               schema:
                 $ref: "#/components/schemas/Battle"
@@ -81,12 +84,12 @@ paths:
           description: Invalid ID supplied
         "404":
           description: Battle not found
-    post:
+  /api/v0-3-0/two_battles/{userId}:
+    get:
       tags:
         - two_battles
-      summary: Updates a battle with form data
-      description: ""
-      operationId: updateBattleWithForm
+      summary: Find all battles for given user
+      operationId: getBattlesForUser
       parameters:
         - name: userId
           in: path
@@ -94,77 +97,78 @@ paths:
           required: true
           schema:
             type: integer
-            format: int64
-        - name: splatnetNum
-          in: path
-          description: Splatnet battle number
-          required: true
+        - name: sort
+          in: query
+          required: false
+          schema:
+            type: string
+            enum:
+              - asc
+              - dec
+        - name: lower_bound
+          in: query
+          required: false
           schema:
             type: integer
-            format: int64
-      requestBody:
-        content:
-          application/x-www-form-urlencoded:
-            schema:
-              type: object
-              properties:
-                name:
-                  description: Updated name of the pet
-                  type: string
-                status:
-                  description: Updated status of the pet
-                  type: string
+            minimum: 0
+        - name: upper_bound
+          in: query
+          required: false
+          schema:
+            type: integer
+            minimum: 0
       responses:
-        "405":
-          description: Invalid input
-  /user:
-    post:
-      tags:
-        - user
-      summary: Create user
-      description: This can only be done by the logged in user.
-      operationId: createUser
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/User"
-        description: Created user object
-        required: true
-      responses:
-        default:
+        "200":
           description: successful operation
-  /user/createWithArray:
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Battle"
+  /api/v0-3-0/two_salmon/:
     post:
       tags:
-        - user
-      summary: Creates list of users with given input array
+        - two_salmon
+      summary: Upload a shift result
       description: ""
-      operationId: createUsersWithArrayInput
+      operationId: addShift
+      parameters:
+        - name: auth_token
+          in: header
+          description: token to be passed as a header
+          required: true
+          schema:
+            type: string
       requestBody:
-        $ref: "#/components/requestBodies/UserArray"
+        $ref: "#/components/requestBodies/Shift"
       responses:
-        default:
+        "200":
           description: successful operation
-  /user/createWithList:
-    post:
+    get:
       tags:
-        - user
-      summary: Creates list of users with given input array
+        - two_salmon
+      summary: Retrieve a list of shifts.
       description: ""
-      operationId: createUsersWithListInput
-      requestBody:
-        $ref: "#/components/requestBodies/UserArray"
+      operationId: getShifts
       responses:
-        default:
+        "200":
           description: successful operation
-  /user/login:
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Shift"
+        "400":
+          description: Invalid status value
+  /api/v0-3-0/user/get_token:
     get:
       tags:
         - user
-      summary: Logs user into the system
+      summary: Gives the user a session token.
       description: ""
-      operationId: loginUser
+      operationId: getToken
       parameters:
         - name: username
           in: query
@@ -174,7 +178,7 @@ paths:
             type: string
         - name: password
           in: query
-          description: The password for login in clear text
+          description: The password for login
           required: true
           schema:
             type: string
@@ -186,42 +190,28 @@ paths:
               description: calls per hour allowed by the user
               schema:
                 type: integer
-                format: int32
             X-Expires-After:
               description: date in UTC when token expires
               schema:
                 type: string
                 format: date-time
           content:
-            application/xml:
-              schema:
-                type: string
             application/json:
               schema:
                 type: string
         "400":
           description: Invalid username/password supplied
-  "/user/logout":
+  /api/v0-3-0/user/{username}:
     get:
       tags:
         - user
-      summary: Logs out current logged in user session
+      summary: Get user id by username
       description: ""
-      operationId: logoutUser
-      responses:
-        default:
-          description: successful operation
-  "/user/{userId}":
-    get:
-      tags:
-        - user
-      summary: Get user by user id
-      description: ""
-      operationId: getUserById
+      operationId: getUserByName
       parameters:
-        - name: userId
+        - name: username
           in: path
-          description: "The Id that needs to be fetched. Use 0 for testing. "
+          description: "The name that needs to be fetched."
           required: true
           schema:
             type: string
@@ -229,55 +219,9 @@ paths:
         "200":
           description: successful operation
           content:
-            application/xml:
-              schema:
-                $ref: "#/components/schemas/User"
             application/json:
               schema:
                 $ref: "#/components/schemas/User"
-        "400":
-          description: Invalid user ID supplied
-        "404":
-          description: User not found
-    put:
-      tags:
-        - user
-      summary: Updated user
-      description: This can only be done by the logged in user.
-      operationId: updateUser
-      parameters:
-        - name: userId
-          in: path
-          description: name that need to be updated
-          required: true
-          schema:
-            type: string
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/User"
-        description: Updated user object
-        required: true
-      responses:
-        "400":
-          description: Invalid user supplied
-        "404":
-          description: User not found
-    delete:
-      tags:
-        - user
-      summary: Delete user
-      description: This can only be done by the logged in user.
-      operationId: deleteUser
-      parameters:
-        - name: userId
-          in: path
-          description: The name that needs to be deleted
-          required: true
-          schema:
-            type: string
-      responses:
         "400":
           description: Invalid username supplied
         "404":
@@ -1164,7 +1108,7 @@ components:
         udemae:
           $ref: "#/components/schemas/udemae"
         stage:
-          $ref: "#/components/schemas/battleTriple"
+          $ref: "#/components/schemas/splatnetTriple"
         other_team_count:
           type: integer
           minimum: 0
@@ -1191,7 +1135,7 @@ components:
         start_time:
           type: integer
         game_mode:
-          $ref: "#/components/schemas/battleDouble"
+          $ref: "#/components/schemas/splatnetDouble"
         x_power:
           type: object
           nullable: true
@@ -1223,12 +1167,12 @@ components:
           type: object
           nullable: true
         my_team_result:
-          $ref: "#/components/schemas/battleDouble"
+          $ref: "#/components/schemas/splatnetDouble"
         estimate_x_power:
           type: object
           nullable: true
         other_team_result:
-          $ref: "#/components/schemas/battleDouble"
+          $ref: "#/components/schemas/splatnetDouble"
         league_point:
           type: number
           nullable: true
@@ -1268,13 +1212,13 @@ components:
       type: object
       properties:
         main:
-          $ref: "#/components/schemas/battleTriple"
+          $ref: "#/components/schemas/splatnetTriple"
         subs:
           type: array
           items:
-            $ref: "#/components/schemas/battleTriple"
+            $ref: "#/components/schemas/splatnetTriple"
           maxItems: 3
-    battleTriple:
+    splatnetTriple:
       type: object
       properties:
         id:
@@ -1285,7 +1229,7 @@ components:
           type: string
     rule:
       allOf:
-        - $ref: "#/components/schemas/battleDouble"
+        - $ref: "#/components/schemas/splatnetDouble"
         - type: object
           properties:
             multiline_name:
@@ -1355,7 +1299,7 @@ components:
           type: string
     clothing:
       allOf:
-        - $ref: "#/components/schemas/battleTriple"
+        - $ref: "#/components/schemas/splatnetTriple"
         - type: object
           properties:
             thumbnail:
@@ -1368,23 +1312,23 @@ components:
               $ref: "#/components/schemas/brand"
     brand:
       allOf:
-        - $ref: "#/components/schemas/battleTriple"
+        - $ref: "#/components/schemas/splatnetTriple"
         - type: object
           properties:
             frequent_skill:
-              $ref: "#/components/schemas/battleTriple"
+              $ref: "#/components/schemas/splatnetTriple"
     weapon:
       allOf:
-        - $ref: "#/components/schemas/battleTriple"
+        - $ref: "#/components/schemas/splatnetTriple"
         - type: object
           properties:
             thumbnail:
               type: string
             sub:
-              $ref: "#/components/schemas/battleQuad"
+              $ref: "#/components/schemas/splatnetQuad"
             special:
-              $ref: "#/components/schemas/battleQuad"
-    battleQuad:
+              $ref: "#/components/schemas/splatnetQuad"
+    splatnetQuad:
       type: object
       properties:
         id:
@@ -1395,7 +1339,7 @@ components:
           type: string
         name:
           type: string
-    battleDouble:
+    splatnetDouble:
       type: object
       properties:
         key:
@@ -1413,6 +1357,7 @@ components:
           minimum: 0
         url:
           type: string
+          format: uri
         user:
           $ref: "#/components/schemas/statInkUser"
         lobby:
@@ -1603,6 +1548,7 @@ components:
           nullable: true
         link_url:
           type: string
+          format: uri
           nullable: true
         note:
           type: object
@@ -1713,6 +1659,7 @@ components:
           type: string
         url:
           type: string
+          format: uri
         join_at:
           $ref: "#/components/schemas/statInkTime"
         profile:
@@ -1741,6 +1688,7 @@ components:
           type: integer
         iso8601:
           type: string
+          format: date-time
       example:
         time: 1527811200
         iso8601: "2018-06-01T00:00:00Z"
@@ -2176,6 +2124,7 @@ components:
           $ref: "#/components/schemas/statInkKeyName"
         splatnet_id:
           type: string
+          pattern: "^[A-Fa-f0-9]{16}$"
         top_500:
           type: boolean
         icon:
@@ -2205,10 +2154,1123 @@ components:
       properties:
         upload_mode:
           type: string
+    Shift:
+      type: object
+      required:
+        - player_splatnet_id
+        - job_id
+        - splatnet_upload
+        - stat_ink_upload
+      properties:
+        player_splatnet_id:
+          type: string
+          pattern: "^[A-Fa-f0-9]{16}$"
+        job_id:
+          type: integer
+          minimum: 0
+        splatnet_upload:
+          type: boolean
+        stat_ink_upload:
+          type: boolean
+        splatnet_json:
+          allOf:
+          - $ref: "#/components/schemas/splatnetShift"
+          - nullable: true
+        stat_ink_json:
+          allOf:
+          - $ref: "#/components/schemas/statInkShift"
+          - nullable: true
+        start_time:
+          type: integer
+          minimum: 0
+          nullable: true
+        play_time:
+          type: integer
+          minimum: 0
+        end_time:
+          type: integer
+          minimum: 0
+          nullable: true
+        danger_rate:
+          type: number
+          minimum: 0
+          maximum: 200
+        is_clear:
+          type: boolean
+        job_failure_reason:
+          type: string
+          enum:
+            - time_limit
+            - wipe_out
+        failure_wave:
+          type: integer
+          minimum: 1
+          maximum: 3
+          nullable: true
+        grade_point:
+          type: integer
+          minimum: 0
+          maximum: 999
+        grade_point_delta:
+          type: integer
+          enum:
+            - -20
+            - -10
+            - -5
+            - 0
+            - 20
+        job_score:
+          type: integer
+          minimum: 0
+          nullable: true
+        drizzler_count:
+          type: integer
+          minimum: 0
+        flyfish_count:
+          type: integer
+          minimum: 0
+        goldie_count:
+          type: integer
+          minimum: 0
+        griller_count:
+          type: integer
+          minimum: 0
+        maws_count:
+          type: integer
+          minimum: 0
+        scrapper_count:
+          type: integer
+          minimum: 0
+        steel_eel_count:
+          type: integer
+          minimum: 0
+        steelhead_count:
+          type: integer
+          minimum: 0
+        stinger_count:
+          type: integer
+          minimum: 0
+        stage:
+          type: string
+          enum:
+            - Salmonid Smokeyard
+            - Ruins of Ark Polaris
+            - Spawning Grounds
+            - Marooner's Bay
+            - Lost Outpost
+        player_name:
+          type: string
+        player_death_count:
+          type: integer
+          minimum: 0
+        player_revive_count:
+          type: integer
+          minimum: 0
+        player_golden_eggs:
+          type: integer
+          minimum: 0
+        player_power_eggs:
+          type: integer
+          minimum: 0
+        player_special:
+          type: string
+          enum:
+            - Splat-Bomb Launcher
+            - Sting Ray
+            - Inkjet
+            - Splashdown
+        player_title:
+          type: string
+          enum:
+            - Apprentice
+            - Part Timer
+            - Go Getter
+            - Overachiever
+            - Profreshional
+        player_species:
+          type: string
+          enum:
+            - inkling
+            - octoling
+          nullable: true
+        player_gender:
+          type: string
+          enum:
+            - boy
+            - girl
+          nullable: true
+        player_w1_specials:
+          type: integer
+          minimum: 0
+          maximum: 2
+        player_w2_specials:
+          type: integer
+          minimum: 0
+          maximum: 2
+          nullable: true
+        player_w3_specials:
+          type: integer
+          minimum: 0
+          maximum: 2
+          nullable: true
+        player_w1_weapon:
+          $ref: "#/components/schemas/salmonWeaponEnum"
+        player_w2_weapon:
+          allOf:
+          - $ref: "#/components/schemas/salmonWeaponEnum"
+          - nullable: true
+        player_w3_weapon:
+          allOf:
+          - $ref: "#/components/schemas/salmonWeaponEnum"
+          - nullable: true
+        player_drizzler_kills:
+          type: integer
+          minimum: 0
+        player_flyfish_kills:
+          type: integer
+          minimum: 0
+        player_goldie_kills:
+          type: integer
+          minimum: 0
+        player_griller_kills:
+          type: integer
+          minimum: 0
+        player_maws_kills:
+          type: integer
+          minimum: 0
+        player_scrapper_kills:
+          type: integer
+          minimum: 0
+        player_steel_eel_kills:
+          type: integer
+          minimum: 0
+        player_steelhead_kills:
+          type: integer
+          minimum: 0
+        player_stinger_kills:
+          type: integer
+          minimum: 0
+        teammate_0_splatnet_id:
+          type: string
+          pattern: "^[A-Fa-f0-9]{16}$"
+          nullable: true
+        teammate_0_name:
+          type: string
+          nullable: true
+        teammate_0_death_count:
+          type: integer
+          minimum: 0
+          nullable: true
+        teammate_0_revive_count:
+          type: integer
+          minimum: 0
+          nullable: true
+        teammate_0_golden_eggs:
+          type: integer
+          minimum: 0
+          nullable: true
+        teammate_0_power_eggs:
+          type: integer
+          minimum: 0
+          nullable: true
+        teammate_0_special:
+          type: string
+          enum:
+            - Splat-Bomb Launcher
+            - Sting Ray
+            - Inkjet
+            - Splashdown
+          nullable: true
+        teammate_0_species:
+          type: string
+          enum:
+            - inkling
+            - octoling
+          nullable: true
+        teammate_0_gender:
+          type: string
+          enum:
+            - boy
+            - girl
+          nullable: true
+        teammate_0_w1_specials:
+          type: integer
+          minimum: 0
+          maximum: 2
+          nullable: true
+        teammate_0_w2_specials:
+          type: integer
+          minimum: 0
+          maximum: 2
+          nullable: true
+        teammate_0_w3_specials:
+          type: integer
+          minimum: 0
+          maximum: 2
+          nullable: true
+        teammate_0_w1_weapon:
+          allOf:
+            - $ref: "#/components/schemas/salmonWeaponEnum"
+            - nullable: true
+        teammate_0_w2_weapon:
+          allOf:
+            - $ref: "#/components/schemas/salmonWeaponEnum"
+            - nullable: true
+        teammate_0_w3_weapon:
+          allOf:
+            - $ref: "#/components/schemas/salmonWeaponEnum"
+            - nullable: true
+        teammate_0_drizzler_kills:
+          type: integer
+          minimum: 0
+          nullable: true
+        teammate_0_flyfish_kills:
+          type: integer
+          minimum: 0
+          nullable: true
+        teammate_0_goldie_kills:
+          type: integer
+          minimum: 0
+          nullable: true
+        teammate_0_griller_kills:
+          type: integer
+          minimum: 0
+          nullable: true
+        teammate_0_maws_kills:
+          type: integer
+          minimum: 0
+          nullable: true
+        teammate_0_scrapper_kills:
+          type: integer
+          minimum: 0
+          nullable: true
+        teammate_0_steel_eel_kills:
+          type: integer
+          minimum: 0
+          nullable: true
+        teammate_0_steelhead_kills:
+          type: integer
+          minimum: 0
+          nullable: true
+        teammate_0_stinger_kills:
+          type: integer
+          minimum: 0
+          nullable: true
+        teammate_1_splatnet_id:
+          type: string
+          pattern: "^[A-Fa-f0-9]{16}$"
+          nullable: true
+        teammate_1_name:
+          type: string
+          nullable: true
+        teammate_1_death_count:
+          type: integer
+          minimum: 0
+          nullable: true
+        teammate_1_revive_count:
+          type: integer
+          minimum: 0
+          nullable: true
+        teammate_1_golden_eggs:
+          type: integer
+          minimum: 0
+          nullable: true
+        teammate_1_power_eggs:
+          type: integer
+          minimum: 0
+          nullable: true
+        teammate_1_special:
+          type: string
+          enum:
+            - Splat-Bomb Launcher
+            - Sting Ray
+            - Inkjet
+            - Splashdown
+          nullable: true
+        teammate_1_species:
+          type: string
+          enum:
+            - inkling
+            - octoling
+          nullable: true
+        teammate_1_gender:
+          type: string
+          enum:
+            - boy
+            - girl
+          nullable: true
+        teammate_1_w1_specials:
+          type: integer
+          minimum: 0
+          maximum: 2
+          nullable: true
+        teammate_1_w2_specials:
+          type: integer
+          minimum: 0
+          maximum: 2
+          nullable: true
+        teammate_1_w3_specials:
+          type: integer
+          minimum: 0
+          maximum: 2
+          nullable: true
+        teammate_1_w1_weapon:
+          allOf:
+            - $ref: "#/components/schemas/salmonWeaponEnum"
+            - nullable: true
+        teammate_1_w2_weapon:
+          allOf:
+            - $ref: "#/components/schemas/salmonWeaponEnum"
+            - nullable: true
+        teammate_1_w3_weapon:
+          allOf:
+            - $ref: "#/components/schemas/salmonWeaponEnum"
+            - nullable: true
+        teammate_1_drizzler_kills:
+          type: integer
+          minimum: 0
+          nullable: true
+        teammate_1_flyfish_kills:
+          type: integer
+          minimum: 0
+          nullable: true
+        teammate_1_goldie_kills:
+          type: integer
+          minimum: 0
+          nullable: true
+        teammate_1_griller_kills:
+          type: integer
+          minimum: 0
+          nullable: true
+        teammate_1_maws_kills:
+          type: integer
+          minimum: 0
+          nullable: true
+        teammate_1_scrapper_kills:
+          type: integer
+          minimum: 0
+          nullable: true
+        teammate_1_steel_eel_kills:
+          type: integer
+          minimum: 0
+          nullable: true
+        teammate_1_steelhead_kills:
+          type: integer
+          minimum: 0
+          nullable: true
+        teammate_1_stinger_kills:
+          type: integer
+          minimum: 0
+          nullable: true
+        teammate_2_splatnet_id:
+          type: string
+          pattern: "^[A-Fa-f0-9]{16}$"
+          nullable: true
+        teammate_2_name:
+          type: string
+          nullable: true
+        teammate_2_death_count:
+          type: integer
+          minimum: 0
+          nullable: true
+        teammate_2_revive_count:
+          type: integer
+          minimum: 0
+          nullable: true
+        teammate_2_golden_eggs:
+          type: integer
+          minimum: 0
+          nullable: true
+        teammate_2_power_eggs:
+          type: integer
+          minimum: 0
+          nullable: true
+        teammate_2_special:
+          type: string
+          enum:
+            - Splat-Bomb Launcher
+            - Sting Ray
+            - Inkjet
+            - Splashdown
+          nullable: true
+        teammate_2_species:
+          type: string
+          enum:
+            - inkling
+            - octoling
+          nullable: true
+        teammate_2_gender:
+          type: string
+          enum:
+            - boy
+            - girl
+          nullable: true
+        teammate_2_w1_specials:
+          type: integer
+          minimum: 0
+          maximum: 2
+        teammate_2_w2_specials:
+          type: integer
+          minimum: 0
+          maximum: 2
+          nullable: true
+        teammate_2_w3_specials:
+          type: integer
+          minimum: 0
+          maximum: 2
+          nullable: true
+        teammate_2_w1_weapon:
+          allOf:
+            - $ref: "#/components/schemas/salmonWeaponEnum"
+            - nullable: true
+        teammate_2_w2_weapon:
+          allOf:
+            - $ref: "#/components/schemas/salmonWeaponEnum"
+            - nullable: true
+        teammate_2_w3_weapon:
+          allOf:
+            - $ref: "#/components/schemas/salmonWeaponEnum"
+            - nullable: true
+        teammate_2_drizzler_kills:
+          type: integer
+          minimum: 0
+          nullable: true
+        teammate_2_flyfish_kills:
+          type: integer
+          minimum: 0
+          nullable: true
+        teammate_2_goldie_kills:
+          type: integer
+          minimum: 0
+          nullable: true
+        teammate_2_griller_kills:
+          type: integer
+          minimum: 0
+          nullable: true
+        teammate_2_maws_kills:
+          type: integer
+          minimum: 0
+          nullable: true
+        teammate_2_scrapper_kills:
+          type: integer
+          minimum: 0
+          nullable: true
+        teammate_2_steel_eel_kills:
+          type: integer
+          minimum: 0
+          nullable: true
+        teammate_2_steelhead_kills:
+          type: integer
+          minimum: 0
+          nullable: true
+        teammate_2_stinger_kills:
+          type: integer
+          minimum: 0
+          nullable: true
+        schedule_end_time:
+          type: integer
+          minimum: 0
+          nullable: true
+        schedule_start_time:
+          type: integer
+          minimum: 0
+        schedule_weapon_0:
+          allOf:
+            - $ref: "#/components/schemas/salmonWeaponScheduleEnum"
+            - nullable: true
+        schedule_weapon_1:
+          allOf:
+            - $ref: "#/components/schemas/salmonWeaponScheduleEnum"
+            - nullable: true
+        schedule_weapon_2:
+          allOf:
+            - $ref: "#/components/schemas/salmonWeaponScheduleEnum"
+            - nullable: true
+        schedule_weapon_3:
+          allOf:
+            - $ref: "#/components/schemas/salmonWeaponScheduleEnum"
+            - nullable: true
+    splatnetShift:
+      type: object
+      properties:
+        danger_rate:
+          type: number
+          minimum: 0
+          maximum: 200
+        job_result:
+          $ref: "#/components/schemas/splatnetJobResult"
+        job_score:
+          type: integer
+          minimum: 0
+        job_rate:
+          type: integer
+          minimum: 90
+          maximum: 435
+        grade_point:
+          type: integer
+          minimum: 0
+          maximum: 999
+        grade_point_delta:
+          type: integer
+          enum:
+            - -20
+            - -10
+            - -5
+            - 0
+            - 20
+        other_results:
+          type: array
+          items:
+            $ref: "#/components/schemas/splatnetShiftPlayer"
+          maxItems: 3
+        kuma_point:
+          type: integer
+        start_time:
+          type: integer
+          minimum: 0
+        player_type:
+          $ref: "#/components/schemas/playerType"
+        play_time:
+          type: integer
+          minimum: 0
+        boss_counts:
+          $ref: "#/components/schemas/bossCounts"
+        end_time:
+          type: integer
+          minimum: 0
+        my_result:
+          $ref: "#/components/schemas/splatnetShiftPlayer"
+        wave_details:
+          type: array
+          items:
+            $ref: "#/components/schemas/wave"
+          minItems: 1
+          maxItems: 3
+        grade:
+          $ref: "#/components/schemas/grade"
+        schedule:
+          $ref: "#/components/schemas/schedule"
+    splatnetJobResult:
+      type: object
+      properties:
+        is_clear:
+          type: boolean
+        failure_reason:
+          type: string
+          enum:
+            - time_limit
+            - wipe_out
+          nullable: true
+        failure_wave:
+          type: integer
+          minimum: 1
+          maximum: 3
+          nullable: true
+    splatnetShiftPlayer:
+      type: object
+      properties:
+        special_counts:
+          type: array
+          items:
+            type: integer
+        special:
+          $ref: "#/components/schemas/splatnetQuad"
+        pid:
+          type: string
+          pattern: "^[A-Fa-f0-9]{16}$"
+        player_type:
+          $ref: "#/components/schemas/playerType"
+        weapon_list:
+          type: array
+          items:
+            $ref: "#/components/schemas/weaponList"
+          minItems: 1
+          maxItems: 3
+        name:
+          type: string
+        dead_count:
+          type: integer
+          minimum: 0
+        golden_ikura_num:
+          type: integer
+          minimum: 0
+        boss_kill_counts:
+          $ref: "#/components/schemas/bossCounts"
+        ikura_num:
+          type: integer
+          minimum: 0
+        help_count:
+          type: integer
+          minimum: 0
+    weaponList:
+      type: object
+      properties:
+        id:
+          type: string
+        weapon:
+          $ref: "#/components/schemas/shiftWeapon"
+    shiftWeapon:
+      allOf:
+        - $ref: "#/components/schemas/splatnetTriple"
+        - type: object
+          properties:
+            thumbnail:
+              type: string
+    bossCounts:
+      type: object
+      properties:
+        3:
+          $ref: "#/components/schemas/boss"
+        6:
+          $ref: "#/components/schemas/boss"
+        9:
+          $ref: "#/components/schemas/boss"
+        12:
+          $ref: "#/components/schemas/boss"
+        13:
+          $ref: "#/components/schemas/boss"
+        14:
+          $ref: "#/components/schemas/boss"
+        15:
+          $ref: "#/components/schemas/boss"
+        16:
+          $ref: "#/components/schemas/boss"
+        21:
+          $ref: "#/components/schemas/boss"
+    boss:
+      type: object
+      properties:
+        boss:
+          $ref: "#/components/schemas/splatnetDouble"
+        count:
+          type: integer
+          minimum: 0
+    wave:
+      type: object
+      properties:
+        water_level:
+          $ref: "#/components/schemas/splatnetDouble"
+        event_type:
+          $ref: "#/components/schemas/splatnetDouble"
+        golden_ikura_num:
+          type: integer
+          minimum: 0
+        golden_ikura_pop_num:
+          type: integer
+          minimum: 0
+        ikura_num:
+          type: integer
+          minimum: 0
+        quota_num:
+          type: integer
+          minimum: 2
+          maximum: 25
+    grade:
+      type: object
+      properties:
+        id:
+          type: string
+        short_name:
+          type: string
+        long_name:
+          type: string
+        name:
+          type: string
+    schedule:
+      type: object
+      properties:
+        start_time:
+          type: integer
+          minimum: 0
+        weapons:
+          type: array
+          items:
+            $ref: "#/components/schemas/weaponList"
+          minItems: 4
+          maxItems: 4
+        end_time:
+          type: integer
+          minimum: 0
+        stage:
+          $ref: "#/components/schemas/stage"
+    stage:
+      type: object
+      properties:
+        image:
+          type: string
+        name:
+          type: string
+    statInkShift:
+      type: object
+      properties:
+        id:
+          type: integer
+          minimum: 0
+        uuid:
+          type: string
+          format: uuid
+        splatnet_number:
+          type: integer
+          minimum: 0
+        url:
+          type: string
+          format: uri
+        api_endpoint:
+          type: string
+          format: uri
+        user:
+          $ref: "#/components/schemas/statInkShiftUser"
+        stage:
+          $ref: "#/components/schemas/statInkTriple"
+        is_cleared:
+          type: boolean
+        fail_reason:
+          $ref: "#/components/schemas/statInkKeyName"
+        clear_waves:
+          type: integer
+          minimum: 0
+          maximum: 3
+        danger_rate:
+          type: string
+          pattern: "^((0\\.[0-9])|([1-9]\\.[0-9])|([1-9][0-9]\\.[0-9])|(1[0-9][0-9]\\.[0-9])|(200\\.0))$"
+        quota:
+          type: array
+          items:
+            type: integer
+            minimum: 2
+            maximum: 25
+          minItems: 1
+          maxItems: 3
+        title:
+          $ref: "#/components/schemas/statInkTitle"
+        title_exp:
+          type: integer
+          minimum: 0
+          maximum: 999
+        title_after:
+          $ref: "#/components/schemas/statInkTitle"
+        title_exp_after:
+          type: integer
+          minimum: 0
+          maximum: 999
+        boss_appearances:
+          type: array
+          items:
+            $ref: "#/components/schemas/statInkBossData"
+          maxItems: 9
+        waves:
+          type: array
+          items:
+            $ref: "#/components/schemas/statInkWave"
+          minItems: 1
+          maxItems: 3
+        my_data:
+          $ref: "#/components/schemas/statInkShiftPlayer"
+        teammates:
+          type: array
+          items:
+            $ref: "#/components/schemas/statInkShiftPlayer"
+          maxItems: 3
+        agent:
+          $ref: "#/components/schemas/statInkSalmonAgent"
+        automated:
+          type: boolean
+        note:
+          type: object
+          nullable: true
+        link_url:
+          type: object
+          nullable: true
+        shift_start_at:
+          $ref: "#/components/schemas/statInkTime"
+        start_at:
+          $ref: "#/components/schemas/statInkTime"
+        end_at:
+          type: object
+          nullable: true
+        register_at:
+          $ref: "#/components/schemas/statInkTime"
+    statInkShiftUser:
+      type: object
+      properties:
+        id:
+          type: integer
+          minimum: 0
+        name:
+          type: string
+        screen_name:
+          type: string
+        url:
+          type: string
+          format: uri
+        salmon_url:
+          type: string
+          format: uri
+        battle_url:
+          type: string
+          format: uri
+        join_at:
+          $ref: "#/components/schemas/statInkTime"
+        profile:
+          $ref: "#/components/schemas/statInkProfile"
+        stats:
+          $ref: "#/components/schemas/statInkShiftStats"
+    statInkShiftStats:
+      type: object
+      properties:
+        work_count:
+          type: integer
+          minimum: 0
+        total_golden_eggs:
+          type: integer
+          minimum: 0
+        total_eggs:
+          type: integer
+          minimum: 0
+        total_rescued:
+          type: integer
+          minimum: 0
+        total_point:
+          type: integer
+          minimum: 0
+        as_of:
+          $ref: "#/components/schemas/statInkTime"
+        registered_at:
+          $ref: "#/components/schemas/statInkTime"
+    statInkTitle:
+      allOf:
+      - $ref: "#/components/schemas/statInkTriple"
+      - type: object
+        properties:
+          generic_name:
+            $ref: "#/components/schemas/statInkName"
+    statInkBossData:
+      type: object
+      properties:
+        boss:
+          $ref: "#/components/schemas/statInkBoss"
+        count:
+          type: integer
+          minimum: 0
+    statInkBoss:
+      allOf:
+      - $ref: "#/components/schemas/statInkTriple"
+      - type: object
+        properties:
+          splatnetStr:
+            type: string
+    statInkWave:
+      type: object
+      properties:
+        known_occurrence:
+          $ref: "#/components/schemas/statInkTriple"
+        water_level:
+          $ref: "#/components/schemas/statInkTriple"
+        golden_egg_quota:
+          type: integer
+          minimum: 2
+          maximum: 25
+        golden_egg_appearances:
+          type: integer
+          minimum: 0
+        golden_egg_delivered:
+          type: integer
+          minimum: 0
+        power_egg_collected:
+          type: integer
+          minimum: 0
+    statInkTriple:
+      allOf:
+      - $ref: "#/components/schemas/statInkKeyName"
+      - type: object
+        properties:
+          splatnet:
+            type: integer
+            minimum: 0
+    statInkShiftPlayer:
+      type: object
+      properties:
+        splatnet_id:
+          type: string
+          pattern: "^[A-Fa-f0-9]{16}$"
+        name:
+          type: string
+        special:
+          $ref: "#/components/schemas/statInkTriple"
+        rescue:
+          type: integer
+          minimum: 0
+        death:
+          type: integer
+          minimum: 0
+        golden_egg_delivered:
+          type: integer
+          minimum: 0
+        power_egg_collected:
+          type: integer
+          minimum: 0
+        species:
+          $ref: "#/components/schemas/statInkKeyName"
+        gender:
+          $ref: "#/components/schemas/statInkGender"
+        special_uses:
+          type: array
+          items:
+            type: integer
+            minimum: 0
+            maximum: 2
+          minItems: 1
+          maxItems: 3
+        weapons:
+          type: array
+          items:
+            $ref: "#/components/schemas/statInkTriple"
+          minItems: 1
+          maxItems: 3
+        boss_kills:
+          type: array
+          items:
+            $ref: "#/components/schemas/statInkBossData"
+          maxItems: 9
+    statInkSalmonAgent:
+      type: object
+      properties:
+        name:
+          type: string
+        version:
+          type: string
+    salmonWeaponEnum:
+      type: string
+      enum:
+        - Sploosh-o-matic
+        - Splattershot Jr.
+        - Splash-o-matic
+        - Aerospray MG
+        - Splattershot
+        - .52 Gal
+        - N-ZAP '85
+        - Splattershot Pro
+        - .96 Gal
+        - Jet Squelcher
+        - Luna Blaster
+        - Blaster
+        - Range Blaster
+        - Clash Blaster
+        - Rapid Blaster
+        - Rapid Blaster Pro
+        - L-3 Nozzlenose
+        - H-3 Nozzlenose
+        - Squeezer
+        - Carbon Roller
+        - Splat Roller
+        - Dynamo Roller
+        - Flingza Roller
+        - Inkbrush
+        - Octobrush
+        - Classic Squiffer
+        - Splat Charger
+        - Splatterscope
+        - E-liter 4K
+        - E-liter 4K Scope
+        - Bamboozler 14 Mk I
+        - Goo Tuber
+        - Slosher
+        - Soda Slosher
+        - Tri-Slosher
+        - Sloshing Machine
+        - Bloblobber
+        - Explosher
+        - Mini Splatling
+        - Heavy Splatling
+        - Hydra Splatling
+        - Ballpoint Splatling
+        - Nautilus 47
+        - Dapple Dualies
+        - Splat Dualies
+        - Glooga Dualies
+        - Dualie Squelchers
+        - Dark Tetra Dualies
+        - Splat Brella
+        - Tenta Brella
+        - Undercover Brella
+        - Grizzco Blaster
+        - Grizzco Brella
+        - Grizzco Charger
+        - Grizzco Slosher
+    salmonWeaponScheduleEnum:
+      type: string
+      enum:
+        - Random Grizzco
+        - Random
+        - Sploosh-o-matic
+        - Splattershot Jr.
+        - Splash-o-matic
+        - Aerospray MG
+        - Splattershot
+        - .52 Gal
+        - N-ZAP '85
+        - Splattershot Pro
+        - .96 Gal
+        - Jet Squelcher
+        - Luna Blaster
+        - Blaster
+        - Range Blaster
+        - Clash Blaster
+        - Rapid Blaster
+        - Rapid Blaster Pro
+        - L-3 Nozzlenose
+        - H-3 Nozzlenose
+        - Squeezer
+        - Carbon Roller
+        - Splat Roller
+        - Dynamo Roller
+        - Flingza Roller
+        - Inkbrush
+        - Octobrush
+        - Classic Squiffer
+        - Splat Charger
+        - Splatterscope
+        - E-liter 4K
+        - E-liter 4K Scope
+        - Bamboozler 14 Mk I
+        - Goo Tuber
+        - Slosher
+        - Soda Slosher
+        - Tri-Slosher
+        - Sloshing Machine
+        - Bloblobber
+        - Explosher
+        - Mini Splatling
+        - Heavy Splatling
+        - Hydra Splatling
+        - Ballpoint Splatling
+        - Nautilus 47
+        - Dapple Dualies
+        - Splat Dualies
+        - Glooga Dualies
+        - Dualie Squelchers
+        - Dark Tetra Dualies
+        - Splat Brella
+        - Tenta Brella
+        - Undercover Brella
+    User:
+      type: object
+      properties:
+        id:
+          type: integer
+          minimum: 0
+        username:
+          type: string
   requestBodies:
     Battle:
       content:
         application/json:
           schema:
             $ref: "#/components/schemas/Battle"
+      required: true
+    Shift:
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Shift"
       required: true
